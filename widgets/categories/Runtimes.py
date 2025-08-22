@@ -16,10 +16,12 @@ class Runtimes(QtWidgets.QStackedWidget):
         from apps.nodejs import NodeJS
         from apps.bun import Bun
         from apps.go import Golang
+        from apps.python import Python
 
         self.nodejs_app = NodeJS()
         self.bun_app = Bun()
         self.golang_app = Golang()
+        self.python_app = Python()
 
         self.nodejs_widget = InstallableWidget(
             title="Node.js",
@@ -48,12 +50,25 @@ class Runtimes(QtWidgets.QStackedWidget):
             show_success_message=False,  # Disable default success message for managed apps
         )
 
+        self.python_widget = InstallableWidget(
+            title="Python (BETA, BEWARE OF BUGS)",
+            description="The Python programming language.",
+            installed=self.python_app.is_installed,
+            on_install=self._handle_python_install,
+            on_manage_versions=self._handle_python_manage_versions,
+            show_success_message=False,  # Disable default success message for managed apps
+        )
+
         self.nodejs_version_manager = VersionManagerWidget(
             self.nodejs_app, "Node.js", parent=self
         )
 
         self.bun_version_manager = VersionManagerWidget(
             self.bun_app, "Bun", parent=self
+        )
+
+        self.python_version_manager = VersionManagerWidget(
+            self.python_app, "Python", parent=self
         )
 
         self.golang_version_manager = VersionManagerWidget(
@@ -63,6 +78,7 @@ class Runtimes(QtWidgets.QStackedWidget):
         self.layout.addWidget(self.nodejs_widget)
         self.layout.addWidget(self.bun_widget)
         self.layout.addWidget(self.golang_widget)
+        self.layout.addWidget(self.python_widget)
 
     def _handle_nodejs_install(self):
         """Handle Node.js installation with version selection"""
@@ -105,6 +121,20 @@ class Runtimes(QtWidgets.QStackedWidget):
     def _handle_golang_manage_versions(self):
         """Show the Go version manager dialog"""
         self.golang_version_manager.show_manager()
+
+    def _handle_python_install(self):
+        """Handle Python installation with version selection"""
+        self._handle_app_install(self.python_app, self.python_widget, "Python")
+
+    def _handle_python_uninstall(self):
+        """Handle Python uninstall and sync widget state"""
+        self._handle_app_uninstall(
+            self.python_app, self.python_widget, "The Python programming language."
+        )
+
+    def _handle_python_manage_versions(self):
+        """Show the Python version manager dialog"""
+        self.python_version_manager.show_manager()
 
     def _handle_app_install(self, app, widget, app_name):
         """Universal app installation handler with version selection"""
