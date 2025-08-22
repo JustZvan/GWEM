@@ -18,6 +18,6 @@ class Sidebar(QtWidgets.QFrame):
         self.plugins_button = QtWidgets.QPushButton("Plugins")
         self.sidebar_layout.addWidget(self.plugins_button)
 
-        self.setMaximumWidth(100)
+        self.setFixedWidth(200)
 
         self.sidebar_layout.addStretch(1)
