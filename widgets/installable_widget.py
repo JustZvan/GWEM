@@ -12,6 +12,7 @@ class InstallableWidget(QtWidgets.QWidget):
         on_manage_versions=None,
         parent=None,
         is_managed=True,
+        show_success_message=True,
     ):
         super().__init__(parent)
         layout = QtWidgets.QVBoxLayout()
@@ -22,6 +23,7 @@ class InstallableWidget(QtWidgets.QWidget):
         self.on_uninstall = on_uninstall
         self.on_manage_versions = on_manage_versions
         self.is_managed = is_managed
+        self.show_success_message = show_success_message
 
         self.install_button = QtWidgets.QPushButton()
         self.update_button_text()
@@ -48,12 +50,29 @@ class InstallableWidget(QtWidgets.QWidget):
     def handle_button(self):
         if not self.installed:
             if self.on_install:
-                self.on_install()
+                try:
+                    self.on_install()
+
+                    if self.show_success_message:
+                        QtWidgets.QMessageBox.information(
+                            self, "Installation Complete", "Done!"
+                        )
+                except Exception as e:
+                    QtWidgets.QMessageBox.critical(
+                        self, "Installation Error", f"Installation failed: {str(e)}"
+                    )
+                    return
             self.installed = True
         else:
             if self.on_uninstall:
-                self.on_uninstall()
-                self.installed = False
+                try:
+                    self.on_uninstall()
+                    self.installed = False
+                except Exception as e:
+                    QtWidgets.QMessageBox.critical(
+                        self, "Uninstallation Error", f"Uninstallation failed: {str(e)}"
+                    )
+                    return
         self.update_button_text()
         self.update_manage_versions_button()
 

@@ -1,0 +1,162 @@
+from apps.Apps import ManagedApp
+from state_manager import APPS_DIR, state_manager
+from widgets.version_selector_dialog import VersionSelectorDialog
+from shim_manager import shim_manager
+import httpx
+import zipfile
+import shutil
+
+
+class Golang(ManagedApp):
+    path = APPS_DIR / "golang"
+
+    def __init__(self):
+        super().__init__("golang")
+
+    def get_available_versions(self):
+        """Get list of available Go versions with display name"""
+
+        response = httpx.get("https://go.dev/dl/?mode=json").json()
+
+        versions = []
+
+        for item in response:
+            real_name = item["version"]
+            display_name = real_name
+            if item.get("stable"):
+                display_name += " (Stable)"
+            versions.append({"real_name": real_name, "display_name": display_name})
+
+        return versions
+
+    def install(self, version: str = None):
+        """Install Go with the specified version"""
+        if version is None:
+            available_versions = self.get_available_versions()
+            version = VersionSelectorDialog.select_version("Go", available_versions)
+            if not version:
+                print("Installation cancelled.")
+                return
+
+        current_installed_versions = self.list_installed_versions()
+        if version in current_installed_versions:
+            print(f"Go {version} is already installed.")
+            return
+
+        print(f"Installing Go {version}...")
+
+        url = f"https://go.dev/dl/{version}.windows-amd64.zip"
+        install_path = self.path / "versions" / version
+        install_path.mkdir(parents=True, exist_ok=True)
+        filename = f"go{version}.zip"
+
+        with httpx.stream("GET", url, follow_redirects=True) as response:
+            if response.status_code == 200:
+                with open(install_path / filename, "wb") as f:
+                    for chunk in response.iter_bytes():
+                        f.write(chunk)
+            else:
+                print(f"Failed to download Go {version}: {response.status_code}")
+                return
+
+        with zipfile.ZipFile(install_path / filename, "r") as zip_ref:
+            zip_ref.extractall(install_path)
+
+        (install_path / filename).unlink(missing_ok=True)
+        self._add_installed_version(version, str(install_path))
+
+        if not self.active_version:
+            self._set_active_version(version)
+            self._save_state(
+                installed=True, version=version, install_path=str(install_path)
+            )
+
+        print(f"Go {version} installed successfully at {install_path}")
+        if self.active_version == version:
+            self._create_shims(version)
+
+    def uninstall(self, version: str = None):
+        """Uninstall Go or specific version"""
+        if version is None:
+            print("Uninstalling all Go versions...")
+            self._remove_shims()
+            for installed_version in list(self.installed_versions.keys()):
+                self._uninstall_version(installed_version)
+            from state_manager import state_manager
+
+            state_manager.remove_app_completely(self.app_name)
+
+            self._load_state()
+            print("All Go versions uninstalled successfully")
+        else:
+            if version not in self.installed_versions:
+                print(f"Go {version} is not installed.")
+                return
+
+            print(f"Uninstalling Go {version}...")
+            is_active_version = self.active_version == version
+            self._uninstall_version(version)
+            self._remove_installed_version(version)
+            if is_active_version:
+                remaining_versions = list(self.installed_versions.keys())
+                if remaining_versions:
+                    new_active = remaining_versions[0]
+                    self._set_active_version(new_active)
+                    print(f"Set {new_active} as the new active version")
+                else:
+                    self._remove_shims()
+                    from state_manager import state_manager
+
+                    state_manager.remove_app_completely(self.app_name)
+                    self._load_state()
+
+            print(f"Go {version} uninstalled successfully")
+
+    def _uninstall_version(self, version: str):
+        """Remove a specific version's files"""
+        version_path = self.path / "versions" / version
+        if version_path.exists():
+            shutil.rmtree(version_path, ignore_errors=True)
+
+    def _create_shims(self, version: str):
+        """Create PowerShell shims for Go executables"""
+        shims_config = [
+            {
+                "executable_name": "go.exe",
+                "executable_subpath": "go/bin",
+                "shim_name": "go",
+            },
+            {
+                "executable_name": "gofmt.exe",
+                "executable_subpath": "go/bin",
+                "shim_name": "gofmt",
+            },
+        ]
+        created_shims = shim_manager.create_multiple_shims(self.app_name, shims_config)
+        print(
+            f"Created {len(created_shims)} shims: {[shim.name for shim in created_shims]}"
+        )
+        from state_manager import APPS_DIR
+
+        install_path = APPS_DIR / "golang" / "versions" / version / "go" / "bin"
+        print(f"Shims pointing to: {install_path}")
+        if install_path.exists():
+            print(f"✓ Path exists")
+            go_exe = install_path / "go.exe"
+            if go_exe.exists():
+                print(f"✓ go.exe found")
+            else:
+                print(f"✗ go.exe NOT found at {go_exe}")
+        else:
+            print(f"✗ Path does NOT exist")
+
+    def _remove_shims(self):
+        """Remove PowerShell shims for Go executables"""
+        executable_names = ["go", "gofmt"]
+        removed_count = shim_manager.remove_multiple_shims(executable_names)
+        print(f"Removed {removed_count} shims")
+
+    def _update_shims_for_version(self, version: str):
+        """Update shims to point to specific version"""
+        self._remove_shims()
+        self._create_shims(version)

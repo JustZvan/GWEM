@@ -2,7 +2,6 @@ from PySide6 import QtWidgets, QtCore
 from widgets.sidebar import Sidebar
 from widgets.categories.Runtimes import Runtimes
 from widgets.categories.CodeEditors import CodeEditors
-from widgets.nodejs_widget import NodejsWidget
 from state_manager import state_manager, PATH_DIR
 import os
 
