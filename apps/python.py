@@ -59,6 +59,14 @@ class Python(ManagedApp):
 
         return versions
 
+    def uninstall(self, version=None):
+        if version:
+            shutil.rmtree(self.path / version, ignore_errors=True)
+            self._remove_installed_version(version)
+        else:
+            shutil.rmtree(self.path, ignore_errors=True)
+            self._remove_installed_version(self.active_version)
+
     def install(self, version):
         print(version)
 
