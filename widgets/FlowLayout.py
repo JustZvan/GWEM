@@ -1,3 +1,8 @@
+# Copyright (C) 2013 Riverbank Computing Limited.
+# Copyright (C) 2022 The Qt Company Ltd.
+# SPDX-License-Identifier: LicenseRef-Qt-Commercial OR BSD-3-Clause
+
+
 """PySide6 port of the widgets/layouts/flowlayout example from Qt v6.x."""
 
 from typing import Literal, override
@@ -11,8 +16,7 @@ IGNORE_SIZE = "ignore_size"
 class FlowWidget(QWidget):
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
-
-    self.setProperty(IGNORE_SIZE, False)
+        self.setProperty(IGNORE_SIZE, False)  # noqa: FBT003
 
 
 class FlowLayout(QLayout):
