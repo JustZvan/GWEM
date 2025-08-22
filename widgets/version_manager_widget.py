@@ -104,7 +104,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
     def refresh_ui(self):
         """Refresh the UI with current state"""
         self.app_instance._load_state()
-        active_version = self.app_instance.get_active_version()
+        active_version = self.app_instance.active_version
         installed_versions = self.app_instance.list_installed_versions()
         available_versions = (
             self.app_instance.get_available_versions()
@@ -153,7 +153,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
         if has_selection:
             selected_version = self.get_selected_version()
-            is_active = selected_version == self.app_instance.get_active_version()
+            is_active = selected_version == self.app_instance.active_version
             self.switch_button.setEnabled(not is_active)
 
     def on_version_selected(self):
@@ -290,7 +290,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
     def reshim_active_version(self):
         """Re-create shims for the currently active version"""
         try:
-            active_version = self.app_instance.get_active_version()
+            active_version = self.app_instance.active_version
             if not active_version:
                 QtWidgets.QMessageBox.warning(
                     self,

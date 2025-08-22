@@ -121,7 +121,7 @@ class Runtimes(QtWidgets.QStackedWidget):
 
             if " (v" in current_description:
                 current_description = current_description.split(" (v")[0]
-            active_version = app.get_active_version()
+            active_version = app.active_version
             if active_version:
                 widget.description_label.setText(
                     f"{current_description} (v{active_version})"

@@ -7,6 +7,7 @@ BASEDIR = Path(os.environ.get("APPDATA", "")) / "GWEM"
 APPS_DIR = BASEDIR / "apps"
 TEMP_PATH = BASEDIR / "temp"
 PATH_DIR = BASEDIR / "path"
+PLUGINS_DIR = BASEDIR / "plugins"
 
 
 class StateManager:
@@ -19,8 +20,12 @@ class StateManager:
         self._preferences = self._load_preferences()
 
     def _ensure_directories(self):
-        """Ensure the GWEM directory exists in APPDATA"""
+        """Ensure the GWEM directory and subdirectories exist in APPDATA"""
         self.appdata_path.mkdir(parents=True, exist_ok=True)
+        APPS_DIR.mkdir(parents=True, exist_ok=True)
+        TEMP_PATH.mkdir(parents=True, exist_ok=True)
+        PATH_DIR.mkdir(parents=True, exist_ok=True)
+        PLUGINS_DIR.mkdir(parents=True, exist_ok=True)
 
     def _load_apps_state(self) -> Dict[str, Any]:
         """Load apps state from the apps.json file"""
