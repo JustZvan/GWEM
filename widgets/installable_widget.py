@@ -44,8 +44,6 @@ class InstallableWidget(QtWidgets.QWidget):
         self.setSizePolicy(
             QtWidgets.QSizePolicy.Policy.Minimum, QtWidgets.QSizePolicy.Policy.Minimum
         )
-        self.setMaximumWidth(200)
-        self.setMaximumHeight(self.sizeHint().height())
 
     def handle_button(self):
         if not self.installed:
