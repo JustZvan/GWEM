@@ -134,7 +134,7 @@ class Bun(ManagedApp):
 
         extracted_folder_name = "bun-windows-x64"
         shims_config = [
-            {"executable_name": "bun", "executable_subpath": extracted_folder_name},
+            {"executable_name": "bun.exe", "executable_subpath": extracted_folder_name},
         ]
         created_shims = shim_manager.create_multiple_shims(self.app_name, shims_config)
         print(

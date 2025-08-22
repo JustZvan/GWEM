@@ -123,8 +123,16 @@ class NodeJS(ManagedApp):
         """Create PowerShell shims for Node.js executables"""
         extracted_folder_name = f"node-{version}-win-x64"
         shims_config = [
-            {"executable_name": "node", "executable_subpath": extracted_folder_name},
-            {"executable_name": "npm", "executable_subpath": extracted_folder_name},
+            {
+                "executable_name": "node.exe",
+                "executable_subpath": extracted_folder_name,
+                "shim_name": "node",
+            },
+            {
+                "executable_name": "npm.ps1",
+                "executable_subpath": extracted_folder_name,
+                "shim_name": "npm",
+            },
         ]
         created_shims = shim_manager.create_multiple_shims(self.app_name, shims_config)
         print(

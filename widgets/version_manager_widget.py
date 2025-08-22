@@ -59,9 +59,13 @@ class VersionManagerWidget(QtWidgets.QDialog):
         self.uninstall_version_button = QtWidgets.QPushButton("Uninstall Version")
         self.uninstall_version_button.clicked.connect(self.uninstall_selected_version)
         self.uninstall_version_button.setEnabled(False)
+        self.reshim_button = QtWidgets.QPushButton("Reshim")
+        self.reshim_button.clicked.connect(self.reshim_active_version)
+        self.reshim_button.setEnabled(True)
 
         version_buttons_layout.addWidget(self.switch_button)
         version_buttons_layout.addWidget(self.uninstall_version_button)
+        version_buttons_layout.addWidget(self.reshim_button)
 
         versions_layout.addLayout(version_buttons_layout)
         self.versions_group.setLayout(versions_layout)
@@ -282,6 +286,28 @@ class VersionManagerWidget(QtWidgets.QDialog):
                     "Uninstall Error",
                     f"Failed to uninstall all versions: {str(e)}",
                 )
+
+    def reshim_active_version(self):
+        """Re-create shims for the currently active version"""
+        try:
+            active_version = self.app_instance.get_active_version()
+            if not active_version:
+                QtWidgets.QMessageBox.warning(
+                    self,
+                    "No Active Version",
+                    f"No active version of {self.app_name} to reshim.",
+                )
+                return
+            self.app_instance._update_shims_for_version(active_version)
+            QtWidgets.QMessageBox.information(
+                self,
+                "Reshim Complete",
+                f"Shims for {self.app_name} {active_version} have been recreated.",
+            )
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(
+                self, "Reshim Error", f"Failed to reshim {self.app_name}: {str(e)}"
+            )
 
     def show_manager(self):
         """Show the version manager dialog"""

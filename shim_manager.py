@@ -22,7 +22,11 @@ class ShimManager:
         self.shims_dir.mkdir(parents=True, exist_ok=True)
 
     def create_shim(
-        self, app_name: str, executable_name: str, executable_subpath: str = ""
+        self,
+        app_name: str,
+        executable_name: str,
+        executable_subpath: str = "",
+        shim_name: str = None,
     ):
         """
         Create a PowerShell shim for an executable
@@ -32,8 +36,11 @@ class ShimManager:
             executable_name: Name of the executable (e.g., 'node', 'npm')
             executable_subpath: Subdirectory path within the app install directory to the executable
                                (e.g., 'bin' or 'node-v20.0.0-win-x64')
+            shim_name: Optional filename for the shim (defaults to executable_name)
         """
-        shim_path = self.shims_dir / f"{executable_name}.ps1"
+        if shim_name is None:
+            shim_name = executable_name
+        shim_path = self.shims_dir / f"{shim_name}.ps1"
 
         # PowerShell script content that reads apps.json and launches the latest version
         script_content = f"""# Auto-generated shim for {executable_name} ({app_name})
@@ -94,7 +101,7 @@ try {{
     $executablePath = Join-Path $executablePath "{executable_subpath}"'''
 
         script_content += f"""
-    $executablePath = Join-Path $executablePath "{executable_name}.exe"
+    $executablePath = Join-Path $executablePath "{executable_name}"
     
     if (-not (Test-Path $executablePath)) {{
         Write-Error "Executable not found at $executablePath"
@@ -102,10 +109,19 @@ try {{
     }}
     
     # Execute the actual program with all passed arguments
-    if ($Args.Count -eq 0) {{
-        & $executablePath
+    # Handle PowerShell scripts differently from regular executables
+    if ($executablePath -like "*.ps1") {{
+        if ($Args.Count -eq 0) {{
+            & powershell.exe -File $executablePath
+        }} else {{
+            & powershell.exe -File $executablePath @Args
+        }}
     }} else {{
-        & $executablePath @Args
+        if ($Args.Count -eq 0) {{
+            & $executablePath
+        }} else {{
+            & $executablePath @Args
+        }}
     }}
     
     # Forward the exit code
@@ -130,19 +146,22 @@ try {{
 
         Args:
             app_name: Name of the app in apps.json
-            shims_config: List of dictionaries with 'executable_name' and optional 'executable_subpath'
+            shims_config: List of dictionaries with 'executable_name', optional 'executable_subpath', and optional 'shim_name'
         """
         created_shims = []
         for config in shims_config:
             executable_name = config["executable_name"]
             executable_subpath = config.get("executable_subpath", "")
-            shim_path = self.create_shim(app_name, executable_name, executable_subpath)
+            shim_name = config.get("shim_name", None)
+            shim_path = self.create_shim(
+                app_name, executable_name, executable_subpath, shim_name
+            )
             created_shims.append(shim_path)
         return created_shims
 
-    def remove_shim(self, executable_name: str):
-        """Remove a shim file"""
-        shim_path = self.shims_dir / f"{executable_name}.ps1"
+    def remove_shim(self, shim_name: str):
+        """Remove a shim file by filename (shim_name)"""
+        shim_path = self.shims_dir / f"{shim_name}.ps1"
         if shim_path.exists():
             shim_path.unlink()
             print(f"Removed shim: {shim_path}")
@@ -151,11 +170,11 @@ try {{
             print(f"Shim not found: {shim_path}")
             return False
 
-    def remove_multiple_shims(self, executable_names: List[str]):
-        """Remove multiple shim files"""
+    def remove_multiple_shims(self, shim_names: List[str]):
+        """Remove multiple shim files by filename (shim_name)"""
         removed_count = 0
-        for executable_name in executable_names:
-            if self.remove_shim(executable_name):
+        for shim_name in shim_names:
+            if self.remove_shim(shim_name):
                 removed_count += 1
         return removed_count
 
@@ -169,9 +188,9 @@ try {{
         """Get the shims directory path"""
         return self.shims_dir
 
-    def is_shim_exists(self, executable_name: str) -> bool:
-        """Check if a shim exists for the given executable"""
-        shim_path = self.shims_dir / f"{executable_name}.ps1"
+    def is_shim_exists(self, shim_name: str) -> bool:
+        """Check if a shim exists for the given filename (shim_name)"""
+        shim_path = self.shims_dir / f"{shim_name}.ps1"
         return shim_path.exists()
 
 
