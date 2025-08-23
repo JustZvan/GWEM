@@ -67,6 +67,23 @@ class Python(ManagedApp):
             shutil.rmtree(self.path, ignore_errors=True)
             self._remove_installed_version(self.active_version)
 
+    def _update_shims_for_version(self, version):
+        shim_manager.create_multiple_shims(
+            "python",
+            [
+                {
+                    "executable_name": "python.exe",
+                    "shim_name": "python",
+                    "executable_subpath": "",
+                },
+                {
+                    "executable_name": "pythonw.exe",
+                    "shim_name": "pythonw",
+                    "executable_subpath": "",
+                },
+            ],
+        )
+
     def install(self, version):
         print(version)
 
@@ -106,13 +123,13 @@ class Python(ManagedApp):
             [
                 {
                     "executable_name": "python.exe",
-                    "executable_subpath": version,
                     "shim_name": "python",
+                    "executable_subpath": "",
                 },
                 {
                     "executable_name": "pythonw.exe",
-                    "executable_subpath": version,
                     "shim_name": "pythonw",
+                    "executable_subpath": "",
                 },
             ],
         )
