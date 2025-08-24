@@ -51,7 +51,7 @@ class Runtimes(QtWidgets.QStackedWidget):
         )
 
         self.python_widget = InstallableWidget(
-            title="Python (BETA, BEWARE OF BUGS)",
+            title="Python",
             description="The Python programming language.",
             installed=self.python_app.is_installed,
             on_install=self._handle_python_install,
