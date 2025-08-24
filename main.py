@@ -3,6 +3,7 @@ from widgets.sidebar import Sidebar
 from widgets.categories.Runtimes import Runtimes
 from widgets.categories.CodeEditors import CodeEditors
 from widgets.categories.Plugins import Plugins
+from widgets.categories.GameEngines import GameEngines
 from state_manager import state_manager, PATH_DIR
 import os
 
@@ -26,32 +27,45 @@ class MainWindow(QtWidgets.QMainWindow):
         self.runtimes_content = Runtimes()
         self.code_editors_content = CodeEditors()
         self.plugins_content = Plugins()
+        self.game_engines_content = GameEngines()
         self.layout.addWidget(self.runtimes_content)
         self.layout.addWidget(self.code_editors_content)
         self.layout.addWidget(self.plugins_content)
+        self.layout.addWidget(self.game_engines_content)
 
         self.runtimes_content.hide()
         self.code_editors_content.show()
         self.plugins_content.hide()
+        self.game_engines_content.hide()
 
         self.sidebar.code_editors_button.clicked.connect(self.show_code_editors)
         self.sidebar.runtimes_button.clicked.connect(self.show_runtimes)
         self.sidebar.plugins_button.clicked.connect(self.show_plugins)
+        self.sidebar.game_engines_button.clicked.connect(self.show_game_engines)
 
     def show_code_editors(self):
         self.runtimes_content.hide()
         self.code_editors_content.show()
         self.plugins_content.hide()
+        self.game_engines_content.hide()
 
     def show_runtimes(self):
         self.code_editors_content.hide()
         self.runtimes_content.show()
         self.plugins_content.hide()
+        self.game_engines_content.hide()
 
     def show_plugins(self):
         self.runtimes_content.hide()
         self.code_editors_content.hide()
         self.plugins_content.show()
+        self.game_engines_content.hide()
+
+    def show_game_engines(self):
+        self.runtimes_content.hide()
+        self.code_editors_content.hide()
+        self.plugins_content.hide()
+        self.game_engines_content.show()
 
 
 if __name__ == "__main__":

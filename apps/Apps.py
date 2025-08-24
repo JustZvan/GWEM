@@ -98,3 +98,37 @@ class ManagedApp:
     def _update_shims_for_version(self, version: str):
         """Update shims to point to specific version. Override in subclasses."""
         pass
+
+    def _update_shortcuts_for_version(self, version: str):
+        """Update shortcuts to point to specific version. Override in subclasses."""
+        # Default implementation - apps can override this method for custom behavior
+        shortcut_configs = self._get_shortcut_configs()
+        if shortcut_configs:
+            from shortcut_manager import shortcut_manager
+
+            for config in shortcut_configs:
+                shortcut_manager.update_shortcut(
+                    app_name=self.app_name,
+                    executable_name=config.get(
+                        "executable_name", f"{self.app_name}.exe"
+                    ),
+                    shortcut_name=config.get("shortcut_name", self.app_name),
+                    executable_subpath=config.get("executable_subpath", ""),
+                    description=config.get(
+                        "description", f"{self.app_name} - Managed by GWEM"
+                    ),
+                    icon_path=config.get("icon_path", ""),
+                    working_directory=config.get("working_directory", ""),
+                    arguments=config.get("arguments", ""),
+                )
+            print(f"Recreated shortcuts for {self.app_name} version {version}")
+
+    def _get_shortcut_configs(self):
+        """Get shortcut configurations for this app. Override in subclasses.
+
+        Returns:
+            List of dictionaries with shortcut configuration.
+            Each dict can contain: 'executable_name', 'shortcut_name', 'executable_subpath',
+            'description', 'icon_path', 'working_directory', 'arguments'
+        """
+        return []

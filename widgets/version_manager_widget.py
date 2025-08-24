@@ -288,7 +288,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
                 )
 
     def reshim_active_version(self):
-        """Re-create shims for the currently active version"""
+        """Re-create shims and shortcuts for the currently active version"""
         try:
             active_version = self.app_instance.active_version
             if not active_version:
@@ -298,11 +298,18 @@ class VersionManagerWidget(QtWidgets.QDialog):
                     f"No active version of {self.app_name} to reshim.",
                 )
                 return
+
+            # Update shims
             self.app_instance._update_shims_for_version(active_version)
+
+            # Update shortcuts if the app has this method
+            if hasattr(self.app_instance, "_update_shortcuts_for_version"):
+                self.app_instance._update_shortcuts_for_version(active_version)
+
             QtWidgets.QMessageBox.information(
                 self,
                 "Reshim Complete",
-                f"Shims for {self.app_name} {active_version} have been recreated.",
+                f"Shims and shortcuts for {self.app_name} {active_version} have been recreated.",
             )
         except Exception as e:
             QtWidgets.QMessageBox.critical(
