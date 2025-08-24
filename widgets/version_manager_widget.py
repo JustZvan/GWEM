@@ -12,8 +12,10 @@ class VersionManagerWidget(QtWidgets.QDialog):
         self.app_name = app_name
         self.setWindowTitle(f"{app_name} Version Manager")
         self.setModal(False)
+        self._available_versions_cache = None
+        self._cache_loaded = False
         self.setup_ui()
-        self.refresh_ui()
+        self.refresh_ui(load_available_versions=False)
 
     def setup_ui(self):
         """Setup the UI components"""
@@ -101,16 +103,40 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
         self.setFixedSize(500, 450)
 
-    def refresh_ui(self):
+    def _get_available_versions_cached(self):
+        """Get available versions with caching to avoid repeated API calls"""
+        if not self._cache_loaded:
+            try:
+                if hasattr(self.app_instance, "get_available_versions"):
+                    self._available_versions_cache = (
+                        self.app_instance.get_available_versions()
+                    )
+                else:
+                    self._available_versions_cache = []
+                self._cache_loaded = True
+            except Exception as e:
+                print(f"Failed to load available versions for {self.app_name}: {e}")
+                self._available_versions_cache = []
+                self._cache_loaded = True
+
+        return self._available_versions_cache or []
+
+    def _clear_versions_cache(self):
+        """Clear the available versions cache to force reload on next access"""
+        self._available_versions_cache = None
+        self._cache_loaded = False
+
+    def refresh_ui(self, load_available_versions=True):
         """Refresh the UI with current state"""
         self.app_instance._load_state()
         active_version = self.app_instance.active_version
         installed_versions = self.app_instance.list_installed_versions()
-        available_versions = (
-            self.app_instance.get_available_versions()
-            if hasattr(self.app_instance, "get_available_versions")
-            else []
-        )
+
+        # Only load available versions if requested (lazy loading)
+        available_versions = []
+        if load_available_versions:
+            available_versions = self._get_available_versions_cached()
+
         display_name_map = {}
         for v in available_versions:
             if isinstance(v, dict):
@@ -171,7 +197,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
     def install_new_version(self):
         """Install a new version of the application"""
         try:
-            available_versions = self.app_instance.get_available_versions()
+            available_versions = self._get_available_versions_cached()
             installed_versions = self.app_instance.list_installed_versions()
 
             available_versions = [
@@ -192,7 +218,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
             if selected_version:
                 self.app_instance.install(selected_version)
-                self.refresh_ui()
+                self.refresh_ui()  # Refresh after installation
                 QtWidgets.QMessageBox.information(
                     self,
                     "Installation Complete",
@@ -318,7 +344,9 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
     def show_manager(self):
         """Show the version manager dialog"""
-        self.refresh_ui()
+        self.refresh_ui(
+            load_available_versions=True
+        )  # Load versions when actually showing
         self.show()
         self.raise_()
         self.activateWindow()

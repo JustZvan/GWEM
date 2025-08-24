@@ -138,7 +138,20 @@ class Runtimes(QtWidgets.QStackedWidget):
 
     def _handle_app_install(self, app, widget, app_name):
         """Universal app installation handler with version selection"""
-        available_versions = app.get_available_versions()
+        version_manager_map = {
+            "Node.js": self.nodejs_version_manager,
+            "Bun": self.bun_version_manager,
+            "Go": self.golang_version_manager,
+            "Python": self.python_version_manager,
+        }
+
+        version_manager = version_manager_map.get(app_name)
+
+        if version_manager:
+            available_versions = version_manager._get_available_versions_cached()
+        else:
+            available_versions = app.get_available_versions()
+
         selected_version = VersionSelectorDialog.select_version(
             app_name, available_versions, parent=self
         )
@@ -157,10 +170,8 @@ class Runtimes(QtWidgets.QStackedWidget):
                     f"{current_description} (v{active_version})"
                 )
 
-            # Show success message for managed apps
             QtWidgets.QMessageBox.information(self, "Installation Complete", "Done!")
         else:
-            # User cancelled the version selection
             raise Exception("Installation cancelled by user")
 
     def _handle_app_uninstall(self, app, widget, original_description):

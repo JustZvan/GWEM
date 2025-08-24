@@ -22,7 +22,7 @@ class GameEngines(QtWidgets.QStackedWidget):
             installed=self.godot_app.is_installed,
             on_install=self._handle_godot_install,
             on_manage_versions=self._handle_godot_manage_versions,
-            show_success_message=False,  # Disable default success message for managed apps
+            show_success_message=False,
         )
         self.godot_version_manager = VersionManagerWidget(
             self.godot_app, "Godot", parent=self
@@ -35,7 +35,14 @@ class GameEngines(QtWidgets.QStackedWidget):
 
     def _handle_app_install(self, app, widget, app_name):
         """Universal app installation handler with version selection"""
-        available_versions = app.get_available_versions()
+
+        if app_name == "Godot":
+            available_versions = (
+                self.godot_version_manager._get_available_versions_cached()
+            )
+        else:
+            available_versions = app.get_available_versions()
+
         selected_version = VersionSelectorDialog.select_version(
             app_name, available_versions, parent=self
         )
