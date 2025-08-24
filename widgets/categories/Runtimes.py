@@ -17,11 +17,13 @@ class Runtimes(QtWidgets.QStackedWidget):
         from apps.bun import Bun
         from apps.go import Golang
         from apps.python import Python
+        from apps.php import Php
 
         self.nodejs_app = NodeJS()
         self.bun_app = Bun()
         self.golang_app = Golang()
         self.python_app = Python()
+        self.php_app = Php()
 
         self.nodejs_widget = InstallableWidget(
             title="Node.js",
@@ -59,6 +61,14 @@ class Runtimes(QtWidgets.QStackedWidget):
             show_success_message=False,  # Disable default success message for managed apps
         )
 
+        self.php_widget = InstallableWidget(
+            title="PHP",
+            description="The PHP programming language.",
+            installed=True,
+            on_install=lambda: None,
+            on_manage_versions=self._handle_php_manage_versions,
+        )
+
         self.nodejs_version_manager = VersionManagerWidget(
             self.nodejs_app, "Node.js", parent=self
         )
@@ -75,10 +85,15 @@ class Runtimes(QtWidgets.QStackedWidget):
             self.golang_app, "Go", parent=self
         )
 
+        self.php_version_manager = VersionManagerWidget(
+            self.php_app, "PHP", parent=self
+        )
+
         self.layout.addWidget(self.nodejs_widget)
         self.layout.addWidget(self.bun_widget)
         self.layout.addWidget(self.golang_widget)
         self.layout.addWidget(self.python_widget)
+        self.layout.addWidget(self.php_widget)
 
     def _handle_nodejs_install(self):
         """Handle Node.js installation with version selection"""
@@ -135,6 +150,10 @@ class Runtimes(QtWidgets.QStackedWidget):
     def _handle_python_manage_versions(self):
         """Show the Python version manager dialog"""
         self.python_version_manager.show_manager()
+
+    def _handle_php_manage_versions(self):
+        """Show the PHP version manager dialog"""
+        self.php_version_manager.show_manager()
 
     def _handle_app_install(self, app, widget, app_name):
         """Universal app installation handler with version selection"""
