@@ -15,11 +15,11 @@ class Sidebar(QtWidgets.QFrame):
         self.runtimes_button = QtWidgets.QPushButton("Languages")
         self.sidebar_layout.addWidget(self.runtimes_button)
 
-        self.plugins_button = QtWidgets.QPushButton("Plugins")
-        self.sidebar_layout.addWidget(self.plugins_button)
-
         self.game_engines_button = QtWidgets.QPushButton("Game Engines")
         self.sidebar_layout.addWidget(self.game_engines_button)
+
+        self.plugins_button = QtWidgets.QPushButton("Plugins")
+        self.sidebar_layout.addWidget(self.plugins_button)
 
         self.setFixedWidth(200)
 
