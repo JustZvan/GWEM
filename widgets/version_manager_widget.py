@@ -24,7 +24,9 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
         header_layout = QtWidgets.QHBoxLayout()
         self.title_label = QtWidgets.QLabel(f"Manage {self.app_name} Versions")
-        self.title_label.setStyleSheet("font-weight: bold; font-size: 16px;")
+        self.title_label.setStyleSheet(
+            "font-weight: bold; font-size: 16px; color: #ffffff;"
+        )
         header_layout.addWidget(self.title_label)
         header_layout.addStretch()
 
@@ -34,7 +36,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
         active_layout = QtWidgets.QHBoxLayout()
 
         self.active_version_label = QtWidgets.QLabel("None")
-        self.active_version_label.setStyleSheet("font-weight: bold; color: green;")
+        self.active_version_label.setStyleSheet("font-weight: bold; color: #00ff00;")
         active_layout.addWidget(QtWidgets.QLabel("Current:"))
         active_layout.addWidget(self.active_version_label)
         active_layout.addStretch()
@@ -80,7 +82,9 @@ class VersionManagerWidget(QtWidgets.QDialog):
 
         self.uninstall_all_button = QtWidgets.QPushButton("Uninstall All")
         self.uninstall_all_button.clicked.connect(self.uninstall_all_versions)
-        self.uninstall_all_button.setStyleSheet("background-color: #ffcccc;")
+        self.uninstall_all_button.setStyleSheet(
+            "background-color: #ff4444; color: #ffffff; font-weight: bold;"
+        )
 
         main_buttons_layout.addWidget(self.install_new_button)
         main_buttons_layout.addStretch()
@@ -98,7 +102,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
         self.layout.addLayout(close_layout)
 
         self.status_label = QtWidgets.QLabel("")
-        self.status_label.setStyleSheet("color: #666; font-style: italic;")
+        self.status_label.setStyleSheet("color: #cccccc; font-style: italic;")
         self.layout.addWidget(self.status_label)
 
         self.setFixedSize(500, 450)
@@ -148,10 +152,14 @@ class VersionManagerWidget(QtWidgets.QDialog):
         if active_version:
             active_display = display_name_map.get(active_version, active_version)
             self.active_version_label.setText(active_display)
-            self.active_version_label.setStyleSheet("font-weight: bold; color: green;")
+            self.active_version_label.setStyleSheet(
+                "font-weight: bold; color: #00ff00;"
+            )
         else:
             self.active_version_label.setText("None")
-            self.active_version_label.setStyleSheet("font-weight: bold; color: red;")
+            self.active_version_label.setStyleSheet(
+                "font-weight: bold; color: #ff4444;"
+            )
         self.versions_list.clear()
         if installed_versions:
             for version in installed_versions:
@@ -160,7 +168,7 @@ class VersionManagerWidget(QtWidgets.QDialog):
                 item.setData(QtCore.Qt.ItemDataRole.UserRole, version)
                 if version == active_version:
                     item.setText(f"{display_name} (Active)")
-                    item.setBackground(QtCore.Qt.GlobalColor.lightGray)
+                    item.setBackground(QtCore.Qt.GlobalColor.darkGray)
                 self.versions_list.addItem(item)
             self.status_label.setText(f"{len(installed_versions)} version(s) installed")
         else:

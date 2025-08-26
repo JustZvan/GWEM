@@ -22,7 +22,7 @@ class VersionSelectorDialog(QtWidgets.QDialog):
             f"Select a version of {self.app_name} to install:"
         )
         header_label.setStyleSheet(
-            "font-weight: bold; font-size: 14px; margin-bottom: 10px;"
+            "font-weight: bold; font-size: 14px; margin-bottom: 10px; color: #ffffff;"
         )
         layout.addWidget(header_label)
 
@@ -52,7 +52,7 @@ class VersionSelectorDialog(QtWidgets.QDialog):
 
         self.info_label = QtWidgets.QLabel("Select a version to see details")
         self.info_label.setWordWrap(True)
-        self.info_label.setStyleSheet("color: #666; font-style: italic;")
+        self.info_label.setStyleSheet("color: #cccccc; font-style: italic;")
         info_layout.addWidget(self.info_label)
 
         info_group.setLayout(info_layout)
@@ -94,12 +94,12 @@ class VersionSelectorDialog(QtWidgets.QDialog):
                 real_name = display_name
             self.selected_version = real_name
             self.info_label.setText(f"Version {display_name} will be installed")
-            self.info_label.setStyleSheet("color: #333;")
+            self.info_label.setStyleSheet("color: #ffffff;")
             self.install_button.setEnabled(True)
         else:
             self.selected_version = None
             self.info_label.setText("Select a version to see details")
-            self.info_label.setStyleSheet("color: #666; font-style: italic;")
+            self.info_label.setStyleSheet("color: #cccccc; font-style: italic;")
             self.install_button.setEnabled(False)
 
     def get_selected_version(self) -> Optional[str]:
