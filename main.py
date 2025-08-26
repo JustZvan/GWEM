@@ -1,4 +1,5 @@
 from PySide6 import QtWidgets, QtCore
+from PySide6.QtGui import QIcon, QAction
 from widgets.sidebar import Sidebar
 from widgets.categories.Runtimes import Runtimes
 from widgets.categories.CodeEditors import CodeEditors
@@ -43,6 +44,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sidebar.plugins_button.clicked.connect(self.show_plugins)
         self.sidebar.game_engines_button.clicked.connect(self.show_game_engines)
 
+        self.create_menubar()
+
+    def create_menubar(self):
+        menubar = self.menuBar()
+        help_menu = menubar.addMenu("Help")
+        about_action = QAction("About", self)
+        about_action.triggered.connect(self.show_about_dialog)
+        help_menu.addAction(about_action)
+
+    def show_about_dialog(self):
+        about_dialog = QtWidgets.QMessageBox(self)
+        about_dialog.setWindowTitle("About GWEM")
+        about_dialog.setIconPixmap(QIcon("assets/icon.ico").pixmap(64, 64))
+        about_dialog.setText("<b>GWEM</b><br>Licensed GPLv3<br>Created by JustZvan")
+        about_dialog.exec()
+
     def show_code_editors(self):
         self.runtimes_content.hide()
         self.code_editors_content.show()
@@ -84,7 +101,11 @@ if __name__ == "__main__":
     style = state_manager.get_style()
     app.setStyle(style)
 
+    icon = QIcon()
+    icon.addFile("assets/icon.ico")
+
     window = MainWindow()
+    window.setWindowIcon(icon)
     window.show()
 
     app.exec()
