@@ -1,0 +1,4 @@
+httpx
+cx-Freeze
+PySide6
+pywin32
